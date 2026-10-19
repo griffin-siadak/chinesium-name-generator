@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chinesium Name Generator</title>
+<meta name="description" content="Generate brand names for products of mysterious origin, like MalsiPree, VAVOFO and SAMSARIC.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --card: #ffffff;
+    --text: #1d1b18;
+    --muted: #6b665d;
+    --border: #e2ddd2;
+    --accent: #e8590c;
+    --accent-text: #ffffff;
+    --chip: #f0ece3;
+    --star: #e8a400;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141312;
+      --card: #1f1d1b;
+      --text: #f1eee8;
+      --muted: #a39d92;
+      --border: #34312c;
+      --accent: #ff7a2e;
+      --accent-text: #1a0d04;
+      --chip: #2a2723;
+      --star: #ffc233;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  header h1 { margin: 0; font-size: clamp(28px, 6vw, 44px); line-height: 1.1; letter-spacing: -0.02em; }
+  header p { margin: 8px 0 0; color: var(--muted); }
+
+  .controls {
+    margin-top: 24px;
+    display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px; box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  select, input[type=text] {
+    font: inherit; font-size: 15px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; min-width: 0;
+  }
+  input[type=text] { width: 100%; }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--text); font-weight: 500; cursor: pointer; padding: 8px 0; }
+  .toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .product-field { flex: 1 1 100%; display: none; }
+  .product-field.show { display: flex; }
+  button {
+    font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); padding: 8px 12px;
+  }
+  button:hover { border-color: var(--muted); }
+  .primary {
+    margin-left: auto; background: var(--accent); color: var(--accent-text); border-color: var(--accent);
+    font-weight: 700; font-size: 16px; padding: 10px 22px;
+  }
+  .primary:hover { filter: brightness(1.07); border-color: var(--accent); }
+  .hint { margin: 10px 2px 0; font-size: 13px; color: var(--muted); }
+  kbd { font: 12px ui-monospace, Menlo, monospace; background: var(--chip); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+  .grid { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 16px 12px;
+    display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); min-width: 0;
+    animation: pop .25s ease-out both;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .logo { font-size: 30px; line-height: 1.15; overflow-wrap: anywhere; min-height: 36px; }
+  .listing { font-size: 13.5px; line-height: 1.45; color: var(--muted); margin: 0; }
+  .listing b { color: var(--text); font-weight: 600; }
+  .actions { display: flex; gap: 6px; margin-top: auto; }
+  .actions button { font-size: 13px; padding: 5px 10px; }
+  .fav-btn.on { color: var(--star); border-color: var(--star); }
+
+  section.favs { margin-top: 40px; }
+  .favs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .favs h2 { margin: 0; font-size: 20px; }
+  .favs ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .favs li {
+    display: flex; align-items: center; gap: 6px; background: var(--chip); border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 6px 4px 12px; font-weight: 600; max-width: 100%;
+  }
+  .favs li span { overflow-wrap: anywhere; cursor: pointer; }
+  .favs li button { border: none; background: none; padding: 2px 6px; color: var(--muted); font-size: 15px; line-height: 1; }
+  .empty { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0;
+    background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 600;
+    transition: opacity .2s, transform .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 560px) {
+    .primary { margin-left: 0; width: 100%; order: 10; }
+    .controls .field:not(.product-field) { flex: 1 1 40%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Chinesium Name Generator</h1>
+    <p>Brand names for products of mysterious origin. Ships in 2–6 weeks.</p>
+  </header>
+
+  <div class="controls">
+    <label class="field">Style
+      <select id="style">
+        <option value="any">Any</option>
+        <option value="upper">ALL CAPS</option>
+        <option value="mid">MidCaps</option>
+        <option value="title">Normal</option>
+      </select>
+    </label>
+    <label class="field">Length
+      <select id="length">
+        <option value="any">Any</option>
+        <option value="short">Short (4–6)</option>
+        <option value="medium">Medium (6–8)</option>
+        <option value="long">Long (9+)</option>
+      </select>
+    </label>
+    <label class="toggle"><input type="checkbox" id="titles"> Add a fake listing title</label>
+    <button class="primary" id="go">Generate</button>
+    <label class="field product-field" id="productField">What's the product? (leave blank for a random one)
+      <input type="text" id="product" placeholder="e.g. dog brush" maxlength="40" autocomplete="off">
+    </label>
+  </div>
+  <p class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to generate more. Click a name to copy it.</p>
+
+  <div class="grid" id="results"></div>
+
+  <section class="favs">
+    <div class="favs-head">
+      <h2>★ Favorites</h2>
+      <button id="clearFavs" hidden>Clear</button>
+    </div>
+    <ul id="favList"></ul>
+    <p class="empty" id="favEmpty">Star a name to keep it here.</p>
+  </section>
+
+  <footer>Names are randomly generated. Any resemblance to a real Amazon seller is purely coincidental (and honestly, likely).</footer>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  // ---------- helpers ----------
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const chance = p => Math.random() < p;
+  const between = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  function weighted(list) {
+    let r = Math.random() * list.reduce((s, [, w]) => s + w, 0);
+    for (const [item, w] of list) if ((r -= w) < 0) return item;
+    return list[list.length - 1][0];
+  }
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+  // ---------- name parts ----------
+  const ONSETS = [
+    ['b',4],['d',4],['f',4],['g',3],['h',3],['j',2],['k',4],['l',5],['m',5],['n',4],['p',4],['r',4],
+    ['s',5],['t',4],['v',4],['w',2],['y',2],['z',3],['x',1],['c',2],
+    ['br',1],['cr',1],['fr',1],['gr',1],['pr',2],['tr',1],['bl',1],['cl',1],['fl',1],['gl',1],
+    ['pl',1],['sl',1],['st',1],['sh',1],['zh',1],['ch',1],['qu',1],['kr',1],['sk',1],['sw',1]
+  ];
+  const VOWELS = [['a',10],['e',7],['i',8],['o',9],['u',4],['ee',2],['oo',2],['ai',1],['ou',1],['ia',1],['y',1]];
+  const CODAS  = [['n',4],['r',3],['l',3],['s',2],['x',1],['m',2],['k',1],['t',1],['ng',1],['rk',1],['st',1]];
+  const ENDINGS = ['ee','o','ix','ic','er','ly','ko','zy','ia','ox','ify','nix','ar','on','us','ta','vo','fo','go','ree','pro','ka','ya','ki','tek','ora'];
+  const SIMPLE_C = 'bdfgklmnprstvzh'.split('');
+  const SIMPLE_V = 'aeiou'.split('');
+  const PREFIXES = ['Green','Home','Soul','Smart','Pet','Kitch','Aqua','Lux','Ever','Sun','Top','Pro','Neo','Vita','Joy','Max',
+    'Eco','Hydro','Moon','Star','Fit','Cozy','Mega','Super','Happy','Lovin','Gold','Tech','Auto','Baby','Bear','Sweet'];
+  const SUFFIXES = ['zech','vana','tek','vio','nix','ify','ora','ly','zy','mo','ree','yee','fun','gou','kee','xin','bay','loo','mia','dor','fly','tak','vix','dun'];
+  const SMASH_C = [['q',3],['w',3],['z',4],['x',3],['k',3],['j',2],['d',2],['g',2],['r',2],['n',2],['h',2],['b',1],['t',1],['m',1],['f',1],['l',1]];
+
+  const BLOCKED = ['fuk','fuck','shit','cunt','nig','fag','rape','cum','porn','dick','cock','tit','puss','kkk','nazi','hitler',
+    'anal','slut','whore','piss','jizz','spic','chink','gook','kike','homo','retard','sex','poop','penis','vag'];
+
+  function syllable() {
+    let s = chance(0.9) ? weighted(ONSETS) : '';
+    s += weighted(VOWELS);
+    if (chance(0.3)) s += weighted(CODAS);
+    return s;
+  }
+
+  // Each pattern returns { parts: [...], smash?: bool }
+  const PATTERNS = [
+    [() => { // MalsiPree: 2-3 syllables, often a catchy ending
+      const n = chance(0.6) ? 2 : 3;
+      const parts = [];
+      for (let i = 0; i < n; i++) parts.push(syllable());
+      if (chance(0.6)) parts.push(pick(ENDINGS));
+      // merge into two chunks so MidCaps has a natural split
+      const cut = between(1, parts.length - 1);
+      return { parts: [parts.slice(0, cut).join(''), parts.slice(cut).join('')] };
+    }, 55],
+    [() => { // VAVOFO: repeated consonant, rhyming vowels
+      const c1 = pick(SIMPLE_C), c2 = pick(SIMPLE_C), v1 = pick(SIMPLE_V), v2 = pick(SIMPLE_V);
+      const form = pick([[c1+v1, c1+v2, c2+v2], [c1+v1, c1+v1, c2+v1], [c1+v1, c2+v1, c1+v2], [c1+v1, c2+v2, c2+v2]]);
+      return { parts: [form[0], form.slice(1).join('')] };
+    }, 15],
+    [() => { // Greenzech: a real word wearing a disguise
+      return chance(0.75)
+        ? { parts: [pick(PREFIXES).toLowerCase(), pick(SUFFIXES)] }
+        : { parts: [syllable(), pick(PREFIXES).toLowerCase()] };
+    }, 20],
+    [() => { // QWZNDZGR: the cat walked across the keyboard
+      let s = '';
+      const len = between(5, 8);
+      for (let i = 0; i < len; i++) s += (i > 0 && chance(0.15)) ? pick(SIMPLE_V) : weighted(SMASH_C);
+      return { parts: [s], smash: true };
+    }, 7],
+  ];
+
+  function tidy(s) {
+    return s
+      .replace(/(.)\1\1+/g, '$1$1')     // no triple letters
+      .replace(/^ng/, 'n')
+      .replace(/([aeiouy]{3,})/g, m => m.slice(0, 2))
+      .replace(/q(?!u)/g, (m, i, str) => i === str.length - 1 ? 'k' : 'q');
+  }
+
+  const LENGTHS = { any: [5, 12], short: [4, 6], medium: [6, 8], long: [9, 13] };
+
+  function makeName(style, length) {
+    const [lo, hi] = LENGTHS[length] || LENGTHS.any;
+    for (let attempt = 0; attempt < 400; attempt++) {
+      const gen = weighted(PATTERNS)();
+      const parts = gen.parts.map(tidy).filter(Boolean);
+      const raw = parts.join('');
+      if (raw.length < lo || raw.length > hi) continue;
+      if (BLOCKED.some(b => raw.includes(b))) continue;
+      if (/[aeiouy]{3}|ii|uu|yy|yi|iy/.test(raw)) continue;
+
+      let s = gen.smash ? 'upper' : style;
+      if (s === 'any') s = weighted([['upper', 35], ['mid', 35], ['title', 25], ['lower', 5]]);
+      if (s === 'mid' && (parts.length < 2 || /^[aeiouy]/.test(parts[parts.length - 1]))) s = 'title';
+
+      if (s === 'upper') return raw.toUpperCase();
+      if (s === 'lower') return raw;
+      if (s === 'mid') return parts.map(cap).join('');
+      return cap(raw);
+    }
+    return 'MalsiPree'; // the patron saint of this website
+  }
+
+  // ---------- fake listing titles ----------
+  const PRODUCTS = ['Dog Brush','Garlic Press','Phone Holder','Shower Head','Car Seat Organizer','Cable Organizer','Ice Cube Tray',
+    'Shoe Rack','Bike Light','Neck Fan','Lint Remover','Cat Water Fountain','Desk Lamp','Silicone Spatula','Toilet Night Light',
+    'Mouse Pad','Bath Mat','Earbuds Case','Waist Trainer','Nose Hair Trimmer','Fridge Organizer','Tactical Flashlight'];
+  const UPGRADES = ['2026 Upgraded','Newest','Upgraded Version','Professional','Heavy Duty','Premium','Ultra-Thin','Multifunctional',
+    'Portable','Large Capacity','Military Grade','Commercial Grade','Upgraded 2.0','Pro Max'];
+  const FEATURES = ['Self-Cleaning','Waterproof','Rechargeable','Non-Slip','Foldable','Adjustable','Anti-Scratch','Ergonomic','Wireless',
+    'Quick-Dry','Odorless','BPA Free','Silicone','Stainless Steel','LED','Magnetic','360° Rotating','Detachable','Leak-Proof',
+    'Ultra Quiet','Anti-Static','Food Grade','Shockproof','Washable','Touch Control','USB-C'];
+  const BENEFITS = ['Easy to Clean','Easy Install','Long Lasting','Space Saving','Time Saving','Tangle-Free','No Drilling',
+    'Super Strong','Lightweight','Durable','Pain Relief','Eco-Friendly'];
+  const AUDIENCES = ['for Men Women','for Kids Adults','for Home Kitchen Office','for Car Travel Camping','for Teens Boys Girls',
+    'for Indoor Outdoor','for Bedroom Living Room Bathroom','for Women Men Seniors','for RV Truck SUV','for Gym Yoga Sports'];
+  const PET_AUDIENCES = ['for Dogs Cats Puppy','for Small Medium Large Dogs','for Cats Kitten Indoor','for Pets Long Short Hair'];
+  const SPECS = ['(Black)','(Grey, 1PCS)','(Pink, 2 Pack)','- Black','(White, 4PCS)','(Blue + Green)','(Rose Gold)','(Khaki, Large)',
+    '(Multicolor, 3 Pack)','(Black, XL)'];
+  const GIFTS = ['Gift for Christmas Birthday','Ideal Gift for Mom Dad','Christmas Stocking Stuffers','Gifts for Him Her',
+    "Valentine's Day Gift",'Perfect Gift for Father\'s Day','White Elephant Gifts','Birthday Gifts for Women'];
+
+  const titleCase = s => s.trim().replace(/\s+/g, ' ').split(' ').map(cap).join(' ');
+
+  function makeListing(brand, productInput) {
+    const product = titleCase(productInput) || pick(PRODUCTS);
+    const head = product.split(' ').pop();
+    const [f1, f2] = shuffle(FEATURES).slice(0, 2);
+    const isPet = /dog|cat|pet|puppy|kitten|bird|fish|hamster|bunny|rabbit/i.test(product);
+    const audience = isPet && chance(0.7) ? pick(PET_AUDIENCES) : pick(chance(0.15) ? PET_AUDIENCES : AUDIENCES);
+    const segments = [
+      `${product}, ${pick(UPGRADES)} ${f1} ${f2} ${product}`,
+      `${pick(BENEFITS)} ${head} ${audience}`,
+      chance(0.5) ? pick(SPECS) : null,
+      chance(0.75) ? pick(GIFTS) : null,
+    ].filter(Boolean);
+    return { brand, rest: segments.join(', ') };
+  }
+
+  function shuffle(a) {
+    const b = a.slice();
+    for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+    return b;
+  }
+
+  // ---------- fake logo styling ----------
+  const FONTS = [
+    ['"Arial Black", "Helvetica Neue", Arial, sans-serif', 900],
+    ['Futura, "Century Gothic", "Trebuchet MS", sans-serif', 700],
+    ['"Avenir Next", Avenir, "Segoe UI", sans-serif', 600],
+    ['"Trebuchet MS", sans-serif', 700],
+    ['Verdana, Geneva, sans-serif', 700],
+    ['Impact, "Arial Narrow Bold", sans-serif', 400],
+    ['Georgia, "Times New Roman", serif', 700],
+    ['"Gill Sans", "Gill Sans MT", Calibri, sans-serif', 600],
+    ['"Courier New", Courier, monospace', 700],
+    ['"Brush Script MT", "Snell Roundhand", cursive', 400],
+  ];
+  const COLORS = ['#d6452e', '#1f74d6', '#16955a', '#d98200', '#8a3ffc', '#d6286f', '#0e95a3', '#5b6b7a', '#b8860b'];
+
+  function logoStyle() {
+    const [family, weight] = pick(FONTS);
+    return `font-family:${family};font-weight:${weight};color:${pick(COLORS)};` +
+      (chance(0.2) ? 'font-style:italic;' : '') +
+      `letter-spacing:${pick(['-0.02em', '0', '0.02em', '0.08em'])};`;
+  }
+
+  // ---------- storage (best effort) ----------
+  const KEY = 'chinesium-favs';
+  function loadFavs() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } }
+  function saveFavs(f) { try { localStorage.setItem(KEY, JSON.stringify(f)); } catch {} }
+  let favs = loadFavs();
+
+  // ---------- UI ----------
+  const $ = id => document.getElementById(id);
+  const results = $('results'), toast = $('toast');
+  let toastTimer;
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+
+  async function copy(text) {
+    try { await navigator.clipboard.writeText(text); }
+    catch {
+      const t = document.createElement('textarea');
+      t.value = text; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); } catch {}
+      t.remove();
+    }
+    showToast(`Copied “${text.length > 40 ? text.slice(0, 40) + '…' : text}”`);
+  }
+
+  function toggleFav(name) {
+    favs = favs.includes(name) ? favs.filter(f => f !== name) : [name, ...favs];
+    saveFavs(favs);
+    renderFavs();
+    syncFavButtons();
+  }
+
+  function syncFavButtons() {
+    document.querySelectorAll('.fav-btn').forEach(b => {
+      const on = favs.includes(b.dataset.name);
+      b.classList.toggle('on', on);
+      b.textContent = on ? '★ Saved' : '☆ Save';
+    });
+  }
+
+  function renderFavs() {
+    const list = $('favList');
+    list.replaceChildren(...favs.map(name => {
+      const li = document.createElement('li');
+      const span = document.createElement('span');
+      span.textContent = name; span.title = 'Copy';
+      span.onclick = () => copy(name);
+      const x = document.createElement('button');
+      x.textContent = '×'; x.setAttribute('aria-label', `Remove ${name}`);
+      x.onclick = () => toggleFav(name);
+      li.append(span, x);
+      return li;
+    }));
+    $('favEmpty').hidden = favs.length > 0;
+    $('clearFavs').hidden = favs.length === 0;
+  }
+
+  function generate() {
+    const style = $('style').value, length = $('length').value;
+    const withTitles = $('titles').checked, product = $('product').value;
+    const count = 9;
+    const seen = new Set();
+    const cards = [];
+    while (cards.length < count) {
+      const name = makeName(style, length);
+      if (seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${cards.length * 30}ms`;
+
+      const logo = document.createElement('div');
+      logo.className = 'logo';
+      logo.style.cssText = logoStyle();
+      logo.textContent = name;
+      logo.title = 'Click to copy';
+      logo.style.cursor = 'pointer';
+      logo.onclick = () => copy(name);
+      card.append(logo);
+
+      let listingText = null;
+      if (withTitles) {
+        const l = makeListing(name, product);
+        listingText = `${l.brand} ${l.rest}`;
+        const p = document.createElement('p');
+        p.className = 'listing';
+        const b = document.createElement('b');
+        b.textContent = l.brand;
+        p.append(b, ' ' + l.rest);
+        card.append(p);
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = 'Copy name';
+      copyBtn.onclick = () => copy(name);
+      actions.append(copyBtn);
+      if (listingText) {
+        const copyTitle = document.createElement('button');
+        copyTitle.textContent = 'Copy title';
+        copyTitle.onclick = () => copy(listingText);
+        actions.append(copyTitle);
+      }
+      const fav = document.createElement('button');
+      fav.className = 'fav-btn' + (favs.includes(name) ? ' on' : '');
+      fav.dataset.name = name;
+      fav.textContent = favs.includes(name) ? '★ Saved' : '☆ Save';
+      fav.onclick = () => toggleFav(name);
+      actions.append(fav);
+      card.append(actions);
+
+      cards.push(card);
+    }
+    results.replaceChildren(...cards);
+  }
+
+  $('go').onclick = generate;
+  $('titles').onchange = e => {
+    $('productField').classList.toggle('show', e.target.checked);
+    generate();
+  };
+  $('style').onchange = generate;
+  $('length').onchange = generate;
+  $('product').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+  $('clearFavs').onclick = () => { if (confirm('Clear all favorites?')) { favs = []; saveFavs(favs); renderFavs(); syncFavButtons(); } };
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); generate(); }
+  });
+
+  renderFavs();
+  generate();
+})();
+</script>
+</body>
+</html>
